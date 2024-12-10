@@ -17,6 +17,7 @@ struct Potion
     float y;
 };
 
+
 vector<vector<int>> game_map; //游戏地图
 pair<float,float> GunnerA_Pos; //GunnerA位置
 pair<float,float> HurlerA_Pos; //HurlerA位置
