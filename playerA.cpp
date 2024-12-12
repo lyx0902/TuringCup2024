@@ -212,6 +212,7 @@ void per_frame_input()
 
     cin >> frame >> frame_count;
 }
+float blood[3]; //存储血量
 void move(string man,float x,float y){                  //让man移动到x,y
     cout << "move "<<man<<" "<< x << " " << y << endl;
 }
@@ -223,7 +224,61 @@ bool isclose(string name,pair<float,float> pos,float x,float y){    //判断pos�
     }
     return false;
 }
+pair<float,float> find_lowest_pos(int i){//寻找血量最低朋友的位置
+    if(i==0){
+        return GunnerA_Pos;
+    }
+    else if(i==1){
+        return HurlerA_Pos;
+    }
+    else if(i==2){
+        return MedicA_Pos;
+    }
+    else{
+        return make_pair(0,0);
+    }
+}
+string find_lowest_name(int i){//找到血量最低的朋友名称
+    if(i==0){
+        return "Gunner";
+    }
+    else if(i==1){
+        return "Hurler";
+    }
+    else if(i==2){
+        return "Medic";
+    }
+    else{
+        return " ";
+    }
 
+}
+string find_lowest_blood(void){    //找到name的朋友
+    float lowest_friend=1000;
+    pair<float,float> lowest_friend_pos;
+    string lowest_friend_name;
+    for(int i = 0; i < 3; i++){
+        if(blood[i]<lowest_friend){
+            lowest_friend=blood[i];
+            lowest_friend_pos=find_lowest_pos(i);
+            lowest_friend_name=find_lowest_name(i);
+        }
+    }
+    return lowest_friend_name;
+}
+void cure_friends(void){    //治疗朋友
+    if(frame_count<=100){
+        cout<<"skill Medic 2 Hurler"<<endl;
+        cerr<<"skill MedicA 2 HurlerA"<<endl;
+    }
+    string friend_name = find_lowest_blood();
+    cerr << "Lowest blood friend: " << friend_name << endl;
+    if(frame_count%3000==1||frame_count%3000==2){
+        cout << "skill "<<"Medic"<<" 2 "<< friend_name << endl;
+        cerr << "Executing skill on: " << friend_name << endl;
+    }
+    return;
+}
 void print_pos(string name){
     if (name=="GunnerA")
     {
@@ -235,6 +290,7 @@ void print_pos(string name){
     }
     return ;
 }
+
 void output_command() //请不要删除End一行，每行输出记得加上换行符
 {
     //示例代码
@@ -255,7 +311,16 @@ void output_command() //请不要删除End一行，每行输出记得加上换�
     // if(frame_count >3000){
     //     cout << "move hurler 22 26.5" << endl;
     // }
-
+    //每秒更新血量
+    if(frame_count%50==0){
+        blood[0]=GunnerA_HP;
+        blood[1]=HurlerA_HP;
+        blood[2]=MedicA_HP;
+    }
+    if(frame_count%50==1||frame_count%50==2){
+        cure_friends();
+        cerr<<"cure !!!"<<endl;
+    }
     //hurler移动到4.5,21.5
     if(Hurler_map["flag1"]==0){
         move("hurler",4.5,21.5);
