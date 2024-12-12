@@ -16,7 +16,7 @@ struct Potion
     float x;
     float y;
 };
-
+int ismap=0;
 vector<vector<int>> game_map; //游戏地图
 pair<float,float> GunnerA_Pos; //GunnerA位置
 pair<float,float> HurlerA_Pos; //HurlerA位置
@@ -211,25 +211,59 @@ void per_frame_input()
     cin >> frame >> frame_count;
 }
 
+bool isclose(pair<float,float> pos,float x,float y){    //判断pos是否在x,y附近
+    if(abs(pos.first-x)<0.1&&abs(pos.second-y)<0.1){
+        return true;
+    }
+    return false;
+}
+void move(string man,float x,float y){                  //让man移动到x,y
+    cout << "move "<<man<<" "<< x << " " << y << endl;
+}
 void output_command() //请不要删除End一行，每行输出记得加上换行符
 {
     //示例代码
-    if (frame_count < 1000)
-    {
-        cout << "move gunner 5 16.5" << endl;
-    }else if (frame_count < 2000)
-    {
-        cout << "move gunner 15 16.5" << endl;
-    }else
-    {
-        cout << "shoot gunner " << GunnerA_Pos.first + 1 << " " << GunnerA_Pos.second << endl;
+    // if (frame_count < 1000)
+    // {
+    //     cout << "move gunner 5 5" << endl;
+    // }else if (frame_count < 2000)
+    // {
+    //     cout << "move hueler 5 10" << endl;
+    // }else if (frame_count < 3000)
+    // {
+    //     cout << "move gunner 5 16.5" << endl;
+
+    // }else
+    // {
+    //     cout << "shoot gunner " << GunnerA_Pos.first + 1 << " " << GunnerA_Pos.second << endl;
+    // }
+    // if(frame_count >3000){
+    //     cout << "move hurler 22 26.5" << endl;
+    // }
+    cout << "move gunner 15 4" << endl;
+    cout << "move hurler 5 20" << endl;
+    if(isclose(GunnerA_Pos,15,4)){
+        cout<<"skill medic 2 gunner"<<endl;
+        float a=5;
+        float b=21;
+        move("gunner",a,b);
     }
-    cout << "skill hurler 1 10 10" << endl;
-    cout << "skill hurler 2" << endl;
-    cout << "skill gunner 1" << endl;
-    cout << "skill gunner 2" << endl;
-    cout << "skill medic 1 3.5 3.5" << endl;
-    cout << "skill medic 2 gunner" << endl;
+    if(ismap==0){
+        for(int i=0;i<game_map.size();i++){
+            for(int j=0;j<game_map[i].size();j++){
+                cerr<<game_map[i][j]<<" ";
+            }
+            cerr<<endl;
+        }
+        ismap=1;
+    }
+
+    // cout << "skill hurler 1 10 10" << endl;
+    // cout << "skill hurler 2" << endl;
+    // cout << "skill gunner 1" << endl;
+    // cout << "skill gunner 2" << endl;
+    // cout << "skill medic 1 3.5 3.5" << endl;
+    // cout << "skill medic 2 gunner" << endl;
 
     //不要删除这一行
     cout << "End" << endl;
@@ -244,6 +278,7 @@ int main()
     {
         per_frame_input();
         output_command();
+        cout<<"hello world"<<endl;
     } 
     return 0;
 }
