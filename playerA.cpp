@@ -18,6 +18,7 @@ struct Potion
     float y;
 };
 int ismap=0;
+float blood[3];
 map<string,int> Medic_map;
 map<string,int> Gunner_map;
 map<string,int> Hurler_map; //类型映射
@@ -214,6 +215,57 @@ void per_frame_input()
 
     cin >> frame >> frame_count;
 }
+
+//函数使用说明使用find_enemy函数作用是：发现周围血量最少的敌军，无传入参数，返回值是敌方的名字，为string类型
+//如果三个人的视野中均无地方，则返回宏NOT_FIND，判断为find_enemy()==NOT_FIND就行
+// string find_enemy(){
+//     bool flag=false;
+//     ifloat blood=0;
+//     string name;
+//     if(GunnerB_Pos.first!=0||GunnerB_Pos.second!=0){
+//         name="GunnerB";
+//         blood=GunnerB_HP;
+//         flag=true;
+//     }
+//     if(HurlerB_Pos.first!=0||HurlerB_Pos.second!=0){
+//         if(flag==false){
+//             name="HurlerB";
+//             blood=GunnerB_HP;
+//             flag=true;
+//         }
+//         else{
+//             if(HurlerB_HP<blood){
+//                 name="HurlerB";
+//                 blood=HurlerB_HP;
+//             }
+//         }
+//     }
+//     if(MedicB_Pos.first!=0||MedicB_Pos.second!=0){
+//         if(flag==false){
+//             name="MedicB";
+//             blood=Medic_HP;
+//             flag=true;
+//         }
+//         else{
+//             if(MedicB_HP<blood){
+//                 name="MedicB";
+//                 blood=MedicB_HP;
+//             }
+//         }
+//     }
+//     if(flag==true){
+//         return name;
+//     }
+//     else{
+//         return "not find";
+//     }
+// }
+
+
+void shoot(string name, float pos_x, float pos_y){
+    cout<<"shoot"<<" "<<name<<" "<<pos_x<<" "<<"pos_y";
+}
+
 void move(string man,float x,float y){                  //让man移动到x,y
     cout << "move "<<man<<" "<< x << " " << y << endl;
 }
@@ -280,6 +332,7 @@ void cure_friends(void){    //治疗朋友
     }
     return;
 }
+
 void print_pos(string name){
     if (name=="GunnerA")
     {
@@ -294,30 +347,29 @@ void print_pos(string name){
 
 void output_command() //请不要删除End一行，每行输出记得加上换行符
 {
-    //示例代码
-    // if (frame_count < 1000)
-    // {
-    //     cout << "move gunner 5 5" << endl;
-    // }else if (frame_count < 2000)
-    // {
-    //     cout << "move hueler 5 10" << endl;
-    // }else if (frame_count < 3000)
-    // {
-    //     cout << "move gunner 5 16.5" << endl;
-
-    // }else
-    // {
-    //     cout << "shoot gunner " << GunnerA_Pos.first + 1 << " " << GunnerA_Pos.second << endl;
-    // }
-    // if(frame_count >3000){
-    //     cout << "move hurler 22 26.5" << endl;
-    // }
-
-    //hurler移动到4.5,21.5
-    if(Hurler_map["flag1"]==0){
-        move("hurler",4.5,21.5);
-        Hurler_map["flag1"]=1;
+    if(MedicA_HP>0){
+        if(frame_count%50==0){
+            blood[0]=GunnerA_HP;
+            blood[1]=HurlerA_HP;
+            blood[2]=MedicA_HP;
     }
+        if(frame_count%50==1||frame_count%50==2){
+            cure_friends();
+            // cerr<<"cure !!!"<<endl;
+        }
+    }
+
+    if(HurlerA_HP>0){
+        if(frame_count%1250){
+        cout<<"skill hurler 1 28.5 26.5"<<endl;
+        }
+
+        //hurler移动到4.5,16.5
+        if(Hurler_map["flag1"]==0){
+            move("hurler",4.5,16.5);
+            Hurler_map["flag1"]=1;
+        }
+        
 
         //hurler移动到12,21.5
         if(Hurler_map["flag2"]==0&&isclose("HurlerA",HurlerA_Pos,4.5,16.5)){
