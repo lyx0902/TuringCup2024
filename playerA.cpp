@@ -214,57 +214,6 @@ void per_frame_input()
 
     cin >> frame >> frame_count;
 }
-
-//函数使用说明使用find_enemy函数作用是：发现周围血量最少的敌军，无传入参数，返回值是敌方的名字，为string类型
-//如果三个人的视野中均无地方，则返回宏NOT_FIND，判断为find_enemy()==NOT_FIND就行
-// string find_enemy(){
-//     bool flag=false;
-//     ifloat blood=0;
-//     string name;
-//     if(GunnerB_Pos.first!=0||GunnerB_Pos.second!=0){
-//         name="GunnerB";
-//         blood=GunnerB_HP;
-//         flag=true;
-//     }
-//     if(HurlerB_Pos.first!=0||HurlerB_Pos.second!=0){
-//         if(flag==false){
-//             name="HurlerB";
-//             blood=GunnerB_HP;
-//             flag=true;
-//         }
-//         else{
-//             if(HurlerB_HP<blood){
-//                 name="HurlerB";
-//                 blood=HurlerB_HP;
-//             }
-//         }
-//     }
-//     if(MedicB_Pos.first!=0||MedicB_Pos.second!=0){
-//         if(flag==false){
-//             name="MedicB";
-//             blood=Medic_HP;
-//             flag=true;
-//         }
-//         else{
-//             if(MedicB_HP<blood){
-//                 name="MedicB";
-//                 blood=MedicB_HP;
-//             }
-//         }
-//     }
-//     if(flag==true){
-//         return name;
-//     }
-//     else{
-//         return "not find";
-//     }
-// }
-
-
-void shoot(string name, float pos_x, float pos_y){
-    cout<<"shoot"<<" "<<name<<" "<<pos_x<<" "<<"pos_y";
-}
-
 void move(string man,float x,float y){                  //让man移动到x,y
     cout << "move "<<man<<" "<< x << " " << y << endl;
 }
@@ -276,7 +225,61 @@ bool isclose(string name,pair<float,float> pos,float x,float y){    //判断pos�
     }
     return false;
 }
+pair<float,float> find_lowest_pos(int i){//寻找血量最低朋友的位置
+    if(i==0){
+        return GunnerA_Pos;
+    }
+    else if(i==1){
+        return HurlerA_Pos;
+    }
+    else if(i==2){
+        return MedicA_Pos;
+    }
+    else{
+        return make_pair(0,0);
+    }
+}
+string find_lowest_name(int i){//找到血量最低的朋友名称
+    if(i==0){
+        return "Gunner";
+    }
+    else if(i==1){
+        return "Hurler";
+    }
+    else if(i==2){
+        return "Medic";
+    }
+    else{
+        return " ";
+    }
 
+}
+string find_lowest_blood(void){    //找到name的朋友
+    float lowest_friend=1000;
+    pair<float,float> lowest_friend_pos;
+    string lowest_friend_name;
+    for(int i = 0; i < 3; i++){
+        if(blood[i]<lowest_friend){
+            lowest_friend=blood[i];
+            lowest_friend_pos=find_lowest_pos(i);
+            lowest_friend_name=find_lowest_name(i);
+        }
+    }
+    return lowest_friend_name;
+}
+void cure_friends(void){    //治疗朋友
+    if(frame_count<=100){
+        cout<<"skill Medic 2 Hurler"<<endl;
+        cerr<<"skill MedicA 2 HurlerA"<<endl;
+    }
+    string friend_name = find_lowest_blood();
+    cerr << "Lowest blood friend: " << friend_name << endl;
+    if(frame_count%3000==1||frame_count%3000==2){
+        cout << "skill "<<"Medic"<<" 2 "<< friend_name << endl;
+        cerr << "Executing skill on: " << friend_name << endl;
+    }
+    return;
+}
 void print_pos(string name){
     if (name=="GunnerA")
     {
@@ -288,19 +291,33 @@ void print_pos(string name){
     }
     return ;
 }
+
 void output_command() //请不要删除End一行，每行输出记得加上换行符
 {
-    if(HurlerA_HP>0){
-        if(frame_count%1250){
-        cout<<"skill hurler 1 28.5 26.5"<<endl;
-        }
+    //示例代码
+    // if (frame_count < 1000)
+    // {
+    //     cout << "move gunner 5 5" << endl;
+    // }else if (frame_count < 2000)
+    // {
+    //     cout << "move hueler 5 10" << endl;
+    // }else if (frame_count < 3000)
+    // {
+    //     cout << "move gunner 5 16.5" << endl;
 
-        //hurler移动到4.5,16.5
-        if(Hurler_map["flag1"]==0){
-            move("hurler",4.5,16.5);
-            Hurler_map["flag1"]=1;
-        }
-        
+    // }else
+    // {
+    //     cout << "shoot gunner " << GunnerA_Pos.first + 1 << " " << GunnerA_Pos.second << endl;
+    // }
+    // if(frame_count >3000){
+    //     cout << "move hurler 22 26.5" << endl;
+    // }
+
+    //hurler移动到4.5,21.5
+    if(Hurler_map["flag1"]==0){
+        move("hurler",4.5,21.5);
+        Hurler_map["flag1"]=1;
+    }
 
         //hurler移动到12,21.5
         if(Hurler_map["flag2"]==0&&isclose("HurlerA",HurlerA_Pos,4.5,16.5)){
