@@ -2,7 +2,8 @@
 #include <math.h>
 #include <string.h>
 #include <vector>
-
+#include <map>
+#include <iomanip>
 using namespace std;
 
 struct Fire
@@ -17,6 +18,7 @@ struct Potion
     float y;
 };
 int ismap=0;
+map<string,int> Hurler_map; //类型映射
 vector<vector<int>> game_map; //游戏地图
 pair<float,float> GunnerA_Pos; //GunnerA位置
 pair<float,float> HurlerA_Pos; //HurlerA位置
@@ -210,15 +212,28 @@ void per_frame_input()
 
     cin >> frame >> frame_count;
 }
-
-bool isclose(pair<float,float> pos,float x,float y){    //判断pos是否在x,y附近
-    if(abs(pos.first-x)<0.1&&abs(pos.second-y)<0.1){
+void move(string man,float x,float y){                  //让man移动到x,y
+    cout << "move "<<man<<" "<< x << " " << y << endl;
+}
+bool isclose(string name,pair<float,float> pos,float x,float y){    //判断pos是否在x,y附近
+    if(abs(pos.first-x)<=0.3&&abs(pos.second-y)<=0.3){
+        // move(name,pos.first-0.5,pos.second-0.5);
+        // cerr<<"move to"<<pos.first-0.5<<" "<<pos.second-0.5<<endl;
         return true;
     }
     return false;
 }
-void move(string man,float x,float y){                  //让man移动到x,y
-    cout << "move "<<man<<" "<< x << " " << y << endl;
+
+void print_pos(string name){
+    if (name=="GunnerA")
+    {
+        cerr<<"GunnerA_Pos:"<<GunnerA_Pos.first<<" "<<GunnerA_Pos.second<<endl;
+    }else if(name=="HurlerA"){
+        cerr<<"HurlerA_Pos:"<<HurlerA_Pos.first<<" "<<HurlerA_Pos.second<<endl;
+    }else if(name=="MedicA"){
+        cerr<<"MedicA_Pos:"<<MedicA_Pos.first<<" "<<MedicA_Pos.second<<endl;
+    }
+    return ;
 }
 void output_command() //请不要删除End一行，每行输出记得加上换行符
 {
@@ -240,23 +255,97 @@ void output_command() //请不要删除End一行，每行输出记得加上换�
     // if(frame_count >3000){
     //     cout << "move hurler 22 26.5" << endl;
     // }
-    cout << "move gunner 15 4" << endl;
-    cout << "move hurler 5 20" << endl;
-    if(isclose(GunnerA_Pos,15,4)){
-        cout<<"skill medic 2 gunner"<<endl;
-        float a=5;
-        float b=21;
-        move("gunner",a,b);
+
+    //hurler移动到4.5,21.5
+    if(Hurler_map["flag1"]==0){
+        move("hurler",4.5,21.5);
+        Hurler_map["flag1"]=1;
     }
-    if(ismap==0){
-        for(int i=0;i<game_map.size();i++){
-            for(int j=0;j<game_map[i].size();j++){
-                cerr<<game_map[i][j]<<" ";
-            }
-            cerr<<endl;
-        }
-        ismap=1;
+
+    //hurler移动到12,21.5
+    if(Hurler_map["flag2"]==0&&isclose("HurlerA",HurlerA_Pos,4.5,21.5)){
+        move ("hurler",12,21.5);
+        Hurler_map["flag2"]=1;
     }
+
+    //打印hurler的位置
+    if((frame_count%100)==0){
+        print_pos("HurlerA");
+    }
+
+    //hurler释放技能
+    if(Hurler_map["flag3"]==0&&isclose("HurlerA",HurlerA_Pos,12,21.5)){
+        // cout<<"skill hurler 1 38 38"<<endl;
+        move("hurler",12,22.5);
+        Hurler_map["flag3"]=1;
+    }
+
+    //hurler移动到16.5,22.5
+    if(Hurler_map["flag4"]==0&&isclose("HurlerA",HurlerA_Pos,12,22.5)){
+        move("hurler",16.5,22.5);
+        Hurler_map["flag4"]=1;
+    }
+
+    //hurler释放技能到26.5，25.5
+    // if(Hurler_map["flag5"]==0&&isclose("HurlerA",HurlerA_Pos,16.5,22.5)){
+    //     cout<<"skill hurler 1 26.5 25.5"<<endl;
+    //     Hurler_map["flag5"]=1;
+    // }
+
+    //刷新hurler技能
+    // if(frame_count%750==0){
+    //     Hurler_map["flag5"]=0;
+    // }
+
+    //hurler去找金币
+    if(has_coin&&Hurler_map["flag6"]==0&&isclose("HurlerA",HurlerA_Pos,16.5,22.5)){
+        move("hurler",16.5,21.5);
+        Hurler_map["flag6"]=1;
+        cerr<<"aaaaaa"<<endl;
+    }
+
+    if(has_coin&&Hurler_map["flag7"]==0&&isclose("HurlerA",HurlerA_Pos,16.5,21.5)){
+        move("hurler",coin_Pos.first,coin_Pos.second);
+        Hurler_map["flag7"]=1;
+        cerr<<"bbbbbb"<<endl;
+    }
+
+    //金币刷新
+    if(has_coin==true&&Hurler_map["flag9"]==1){
+        Hurler_map["flag6"]=0;
+        Hurler_map["flag7"]=0;
+        Hurler_map["flag8"]=0;
+        Hurler_map["flag9"]=0;
+    }
+
+    //hurler跑回去
+    if(Hurler_map["flag8"]==0&&!has_coin){
+        move("hurler",16.5,21.5);
+        cerr<<"cccccc"<<endl;
+        Hurler_map["flag8"]=1;
+    }
+
+    if(frame_count%50==0){
+        cerr<<Hurler_map["flag6"]<<" "<<Hurler_map["flag7"]<<" "<<Hurler_map["flag8"]<<" "<<Hurler_map["flag9"]<<endl;
+    }
+
+
+    if(Hurler_map["flag9"]==0&&Hurler_map["flag8"]==1&&isclose("HurlerA",HurlerA_Pos,16.5,21.5)){
+        move("hurler",16.5,22.5);
+        Hurler_map["flag9"]=1;
+        cerr<<"dddddd"<<endl;
+    }
+
+
+    // if(ismap==0){
+    //     for(int i=0;i<game_map.size();i++){
+    //         for(int j=0;j<game_map[i].size();j++){
+    //             cerr<<game_map[i][j]<<" ";
+    //         }
+    //         cerr<<endl;
+    //     }
+    //     ismap=1;
+    // }
 
     // cout << "skill hurler 1 10 10" << endl;
     // cout << "skill hurler 2" << endl;
@@ -273,7 +362,7 @@ int main()
 {
     //初始化地图
     init_input();
-
+    cerr << fixed << std::setprecision(4);
     while(true)
     {
         per_frame_input();
