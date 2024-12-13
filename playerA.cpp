@@ -292,6 +292,40 @@ void per_frame_input()
 //         return "not find";
 //     }
 // }
+
+bool is_wall_between(pair<float, float> start, pair<float, float> end) {
+    int x1 = static_cast<int>(start.first);
+    int y1 = static_cast<int>(start.second);
+    int x2 = static_cast<int>(end.first);
+    int y2 = static_cast<int>(end.second);
+
+    int dx = abs(x2 - x1);
+    int dy = abs(y2 - y1);
+    int sx = (x1 < x2) ? 1 : -1;
+    int sy = (y1 < y2) ? 1 : -1;
+    int err = dx - dy;
+
+    while (true) {
+        if (game_map[y1][x1] == 2) {
+            return true; // 有墙体阻隔
+        }
+        if (x1 == x2 && y1 == y2) {
+            break;
+        }
+        int e2 = 2 * err;
+        if (e2 > -dy) {
+            err -= dy;
+            x1 += sx;
+        }
+        if (e2 < dx) {
+            err += dx;
+            y1 += sy;
+        }
+    }
+    return false; // 没有墙体阻隔
+}
+
+
 bool isAroud(pair<float,float> pos1,pair<float,float> pos2){    //判断pos1是否在pos2附近
     if(abs(pos1.first-pos2.first)<=20&&abs(pos1.second-pos2.second)<=20){
         return true;
@@ -655,7 +689,13 @@ void output_command() //请不要删除End一行，每行输出记得加上换�
         if(frame_count%100==0){
             Gunner_enemy= find_Gunner_enemy();
             cerr<<"isfind_Gunner_enemy name:"<<Gunner_enemy.name<<endl;
-        }
+            bool has_wall = is_wall_between(GunnerA_Pos, Gunner_enemy.Pos);
+            if (has_wall) {
+                cerr << "yes there is a wall" << endl;
+            } else {
+                cerr << "no there is not a wall" << endl;
+            }
+            }
         
         if(Gunner_enemy.name!="notfind"){
             Gunner_map["stage_init"]=1;
