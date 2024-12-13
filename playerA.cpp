@@ -4,6 +4,9 @@
 #include <vector>
 #include <map>
 #include <iomanip>
+#include <unordered_map>
+#include <queue>
+#include <algorithm>
 using namespace std;
 #define NOT_FIND ="not find"
 struct Fire
@@ -41,6 +44,25 @@ int scoreA; //A阵营得分
 int scoreB; //B阵营得分
 vector<Fire> fire_pos; //场上火焰的位置
 vector<Potion> potion_pos; //场上药水的位置
+struct Enemy {
+    string name;            // 敌人名称
+    float HP;               // 敌人血量
+    pair<float, float> Pos; // 敌人位置 (x, y)
+
+    // 构造函数（带位置参数）
+    Enemy(const string& n, float h, pair<float, float> p) : name(n), HP(h), Pos(p) {}
+
+    // 默认构造函数（返回默认敌人）
+    Enemy() : name("notfind"), HP(-1.0f), Pos({0.0f, 0.0f}) {}
+
+    // 重载小于运算符（用于优先队列，血量小的优先级更高）
+    bool operator<(const Enemy& other) const {
+        return HP > other.HP; // 小根堆，血量越小优先级越高
+    }
+};
+Enemy Gunner_enemy("notfind",-1.0f,{0.0f,0.0f});
+Enemy Hurler_enemy("notfind",-1.0f,{0.0f,0.0f});
+Enemy Medic_enemy("notfind",-1.0f,{0.0f,0.0f});
 
 int frame_count; //帧数信息
 
@@ -261,14 +283,36 @@ void per_frame_input()
 //     }
 // }
 
+Enemy find_Gunner_enemy(){
+    priority_queue<Enemy> enemyQueue;
+    if(GunnerB_Pos.first!=0||GunnerB_Pos.second!=0){
+        enemyQueue.push(Enemy("GunnerB",GunnerB_HP,GunnerB_Pos));
+    }
+    if(HurlerB_Pos.first!=0||HurlerB_Pos.second!=0){
+        enemyQueue.push(Enemy("HurlerB",HurlerB_HP,HurlerB_Pos));
+    }
+    if(MedicB_Pos.first!=0||MedicB_Pos.second!=0){
+        enemyQueue.push(Enemy("MedicB",MedicB_HP,MedicB_Pos));
+    }
+    if(enemyQueue.empty()){
+        return Enemy();
+    }
+    else{
+        return enemyQueue.top();
+    }
+}
+
 
 void shoot(string name, float pos_x, float pos_y){
-    cout<<"shoot"<<" "<<name<<" "<<pos_x<<" "<<"pos_y";
+    // cout<<"shoot Gunner "<<Gunner_enemy.Pos.first<<" "<<Gunner_enemy.Pos.second<<endl;
+    cout<<"shoot"<<" "<<name<<" "<<pos_x<<" "<<pos_y<<endl;
 }
 
 void move(string man,float x,float y){                  //让man移动到x,y
     cout << "move "<<man<<" "<< x << " " << y << endl;
 }
+
+
 bool isclose(string name,pair<float,float> pos,float x,float y){    //判断pos是否在x,y附近
     if(abs(pos.first-x)<=0.3&&abs(pos.second-y)<=0.3){
         // move(name,pos.first-0.5,pos.second-0.5);
@@ -322,13 +366,13 @@ string find_lowest_blood(void){    //找到name的朋友
 void cure_friends(void){    //治疗朋友
     if(frame_count<=100){
         cout<<"skill Medic 2 Hurler"<<endl;
-        cerr<<"skill MedicA 2 HurlerA"<<endl;
+        // cerr<<"skill MedicA 2 HurlerA"<<endl;
     }
     string friend_name = find_lowest_blood();
-    cerr << "Lowest blood friend: " << friend_name << endl;
+    // cerr << "Lowest blood friend: " << friend_name << endl;
     if(frame_count%3000==1||frame_count%3000==2){
         cout << "skill "<<"Medic"<<" 2 "<< friend_name << endl;
-        cerr << "Executing skill on: " << friend_name << endl;
+        // cerr << "Executing skill on: " << friend_name << endl;
     }
     return;
 }
@@ -360,19 +404,26 @@ void output_command() //请不要删除End一行，每行输出记得加上换�
     }
 
     if(HurlerA_HP>0){
-        if(frame_count%1250){
-        cout<<"skill hurler 1 28.5 26.5"<<endl;
+
+        if(frame_count%50==0){
+            // print_pos("HurlerA");
         }
 
+        //hurler释放技能1
+        cout<<"skill hurler 1 28.5 26.5"<<endl;
+
+        
+    
         //hurler移动到4.5,16.5
         if(Hurler_map["flag1"]==0){
+            cerr<<"move to 4.5 16.5"<<endl;
             move("hurler",4.5,16.5);
             Hurler_map["flag1"]=1;
         }
         
-
         //hurler移动到12,21.5
         if(Hurler_map["flag2"]==0&&isclose("HurlerA",HurlerA_Pos,4.5,16.5)){
+            cerr<<"move to 12 21.5"<<endl;
             move ("hurler",15.5,16.5);
             Hurler_map["flag2"]=1;
         }
@@ -431,6 +482,8 @@ void output_command() //请不要删除End一行，每行输出记得加上换�
 
         //hurler跑回去
         if(Hurler_map["flag8"]==0&&!has_coin){
+            //hurler释放技能2
+            cout<<"skill hurler 2"<<endl;
             move("hurler",16.5,21.5);
             cerr<<"cccccc"<<endl;
             Hurler_map["flag8"]=1;
@@ -449,16 +502,53 @@ void output_command() //请不要删除End一行，每行输出记得加上换�
     }
     
     if(GunnerA_HP>0){
+        //Gunner释放技能1
+        if(frame_count%1000==1){
+            cout<<"skill Gunner 1"<<endl;
+        }
+
+        if(frame_count%100==0){
+            Gunner_enemy= find_Gunner_enemy();
+            cerr<<"isfind_Gunner_enemy name:"<<Gunner_enemy.name<<endl;
+        }
         
-        if(Gunner_map["flag1"]==0){
-            move("gunner",22.5,4.5);
+        if(Gunner_enemy.name!="notfind"){
+            // cerr<<"enemy name:"<<Gunner_enemy.name<<endl;
+            // cerr<<"enemy pos:"<<Gunner_enemy.Pos.first<<" "<<Gunner_enemy.Pos.second<<endl;
+            cout<<"skill Gunner 2"<<endl;
+            shoot("Gunner",Gunner_enemy.Pos.first,Gunner_enemy.Pos.second);
+            // cout<<"shoot Gunner "<<Gunner_enemy.Pos.first<<" "<<Gunner_enemy.Pos.second<<endl;
+            // cout<<"shoot Gunner 1 30 "
+        }
+
+        if(Gunner_map["flag0"]==0){
+            move("gunner",6.5,4.5);
+            Gunner_map["flag0"]=1;
+        }
+
+        if(Gunner_map["flag1"]==0&&isclose("GunnerA",GunnerA_Pos,6.5,4.5)){
+            move("gunner",21.5,4.5);
+            cerr<<"gunner move to 21.5,4.5"<<endl;
             Gunner_map["flag1"]=1;
         }
-        if(Gunner_map["flag2"]==0){
+
+
+        if(Gunner_map["flag2"]==0&&isclose("GunnerA",GunnerA_Pos,21.5,4.5)){
             move("gunner",27.5,9.5);
             Gunner_map["flag2"]=1;
         }
 
+        if(Gunner_map["flag3"]==0&&isclose("GunnerA",GunnerA_Pos,27.5,9.5)){
+            move("gunner",27.5,11.5);
+            Gunner_map["flag3"]=1;
+        }
+
+        if(Gunner_map["flag4"]==0&&isclose("GunnerA",GunnerA_Pos,27.5,11.5)){
+            move("gunner",27.5,24.5);
+            Gunner_map["flag4"]=1;
+        }
+
+        
 
     }
 
