@@ -10,6 +10,7 @@
 using namespace std;
 #define NOT_FIND ="not find"
 
+
 int Gunner_frame;
 struct Fire
 {
