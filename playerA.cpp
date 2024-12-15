@@ -305,8 +305,11 @@ bool is_wall_between(pair<float, float> start, pair<float, float> end) {
     int sy = (y1 < y2) ? 1 : -1;
     int err = dx - dy;
 
+    
+
     while (true) {
         if (game_map[y1][x1] == 2) {
+
             return true; // 有墙体阻隔
         }
         if (x1 == x2 && y1 == y2) {
@@ -331,11 +334,12 @@ bool isAroud(pair<float,float> pos1,pair<float,float> pos2){    //判断pos1是�
         return true;
     }
     return false;
-
 }
+
 bool isVisible(pair<float, float> targetPos) {
     return !(targetPos.first == 0 && targetPos.second == 0);
 }
+
 float calculateDistance(pair<float, float> pos1, pair<float, float> pos2) {
     return sqrt(pow(pos1.first - pos2.first, 2) + pow(pos1.second - pos2.second, 2));
 }
@@ -476,9 +480,9 @@ void Gunner_patrol(){
         move("Gunner",27.5,11.5);
         Gunner_map["flag5"]=1;
         Gunner_map["flag6"]=0;
-    }
-    
+    } 
 }
+
 void fresh_Gunner_Pos(){
     // cerr<<"11111111111fresh_Gunner_Pos to 27.5,11.5"<<endl;
     move("Gunner",27.5,9.5);
@@ -487,6 +491,7 @@ void fresh_Gunner_Pos(){
 void medic_skill1(pair<float,float>pos){ //medic释放技能1
     cout<<"skill Medic 1 "<<pos.first<<" "<<pos.second<<endl;
 }
+
 bool ishold(string name,pair<float,float> pos){   
     if(name=="GunnerA"){
         if(abs(Gunner_Last_Pos.first-pos.first)<=1&&abs(Gunner_Last_Pos.second-pos.second)<=1){
@@ -520,6 +525,7 @@ bool ishold(string name,pair<float,float> pos){
     }
     return false;
 }
+
 void print_pos(string name){
     if (name=="GunnerA")
     {
@@ -533,7 +539,8 @@ void print_pos(string name){
 }
 
 void output_command() //请不要删除End一行，每行输出记得加上换行符
-{
+{   
+
     if(MedicA_HP>0){
         if(frame_count%50==0){
             blood[0]=GunnerA_HP;
@@ -697,7 +704,7 @@ void output_command() //请不要删除End一行，每行输出记得加上换�
             }
             }
         
-        if(Gunner_enemy.name!="notfind"){
+        if(Gunner_enemy.name!="notfind"&&is_wall_between(GunnerA_Pos, Gunner_enemy.Pos)==false){
             Gunner_map["stage_init"]=1;
             // cerr<<"enemy name:"<<Gunner_enemy.name<<endl;
             // cerr<<"enemy pos:"<<Gunner_enemy.Pos.first<<" "<<Gunner_enemy.Pos.second<<endl;
@@ -707,7 +714,7 @@ void output_command() //请不要删除End一行，每行输出记得加上换�
             // cout<<"shoot Gunner "<<Gunner_enemy.Pos.first<<" "<<Gunner_enemy.Pos.second<<endl;
             // cout<<"shoot Gunner 1 30 "
             Gunner_map["stage_back"]=0;
-        }else if(Gunner_enemy.name=="notfind"&&Gunner_map["stage_fire"]==1){
+        }else if((Gunner_enemy.name=="notfind"&&Gunner_map["stage_fire"]==1)||(is_wall_between(GunnerA_Pos, Gunner_enemy.Pos)==true&&Gunner_enemy.name!="notfind")){
             // cerr<<"not find enemy"<<endl;
             Gunner_map["stage_fire"]=0;
             Gunner_map["stage_unfire"]=1;
@@ -774,8 +781,21 @@ void output_command() //请不要删除End一行，每行输出记得加上换�
                 move("gunner",27.5,24.5);
                 Gunner_map["flag4"]=1;
             }
+
+
         }
+
+        
+
+        
+
     }
+
+
+
+
+
+
     //不要删除这一行
     cout << "End" << endl;
 }
@@ -784,12 +804,14 @@ int main()
 {
     //初始化地图
     init_input();
+    game_map[16][22]=2;
+    game_map[25][19]=2;
     cerr << fixed << std::setprecision(4);
     while(true)
     {
         per_frame_input();
         output_command();
-        cout<<"hello world"<<endl;
+        // cout<<"hello world"<<endl;
     } 
     return 0;
 }
